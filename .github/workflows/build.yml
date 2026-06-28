@@ -1,0 +1,34 @@
+name: Build Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: pip install pandas
+
+      - run: |
+          mkdir -p docs
+          python make_questions_html.py
+          mv questions_practice.html docs/index.html
+          cp -r pdf_images docs/pdf_images
+
+      - name: Commit built site
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "build pages"
+          file_pattern: docs/*
